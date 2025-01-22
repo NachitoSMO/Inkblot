@@ -1,0 +1,14 @@
+{
+    "id": "inkblot",
+    "name": "Inkblot",
+    "author": ["TeamToaster"],
+    "description": "Adds a joker with the ability to mimic any random Joker abiity.",
+    "prefix": "Inkblot",
+    "main_file": "src/inkblot.lua",
+    "priority": 1,
+    "badge_colour": "eeb10f",
+    "dependencies": [
+        "Steamodded (>=1.0.0~ALPHA-1225a)"
+    ],
+    "version": "1.0.0"
+}

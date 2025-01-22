@@ -1,0 +1,4 @@
+Inkblot = {}
+Inkblot.INIT = {
+    Jokers = {}
+}

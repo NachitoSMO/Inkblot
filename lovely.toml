@@ -1,0 +1,74 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+[[patches]]
+[patches.pattern]
+target = "functions/button_callbacks.lua"
+match_indent = true
+pattern = '''G.deck:shuffle('cashout'..G.GAME.round_resets.ante)'''
+position = "after"
+payload = '''
+for i=1, #G.jokers.cards do
+    eval_card(G.jokers.cards[i], {pl_cash_out = true})
+end
+'''
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = '''elseif self.ability.name == 'Perkeo' then loc_vars = {self.ability.extra}
+        end'''
+position = "after"
+payload = '''
+if G.jokers then
+  for i=1, #G.jokers.cards do
+    if self.ability.name == G.jokers.cards[i].ability.name and G.jokers.cards[i].config.center.key == 'j_Inkblot_inkblot_joker' then
+      self.plantain_info = loc_vars
+    end
+  end
+  if G.shop_jokers and G.shop_jokers.cards then
+    for i=1, #G.shop_jokers.cards do
+      if self.ability.name == G.shop_jokers.cards[i].ability.name and G.shop_jokers.cards[i].config.center.key == 'j_Inkblot_inkblot_joker' then
+        self.plantain_info = loc_vars
+      end
+    end
+  end
+end
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = '''if obj.calc_dollar_bonus and type(obj.calc_dollar_bonus) == 'function' then
+            return obj:calc_dollar_bonus(self)
+        end'''
+position = "at"
+payload = '''
+if obj.calc_dollar_bonus and type(obj.calc_dollar_bonus) == 'function' then
+  return obj:calc_dollar_bonus(self)
+elseif self.calc_dollar_bonus and type(self.calc_dollar_bonus) == 'function' then
+  return self:calc_dollar_bonus(self)
+end'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "functions/common_events.lua"
+pattern = '''if not card then'''
+position = "at"
+payload = '''if not card and cfg then'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+pattern = '''if other_joker and other_joker ~= self and other_joker.config.center.blueprint_compat then'''
+position = "at"
+payload = '''
+if other_joker and other_joker ~= self and (other_joker.config.center.blueprint_compat or other_joker.blueprint_compat) then'''
+match_indent = true
+
