@@ -5,6 +5,54 @@ SMODS.Atlas {
   py = 95
 }
 
+local InkConfig = SMODS.current_mod.config
+
+local create_nodes = function()
+  local nodes_final = {}
+  local valid_ids = {inkblot = 'inkblot'}
+  
+  table.insert(nodes_final, {
+    n = G.UIT.R,
+    nodes = {
+      create_toggle({
+        label = 'Copy Vanilla Jokers',
+        ref_table = InkConfig,
+        ref_value = 'inkvanilla',
+      }),
+    }
+  })
+  
+  for _, mod in ipairs(SMODS.mod_list) do
+    if mod.id and not valid_ids[mod.id] then
+      valid_ids[mod.id] = mod.id
+      table.insert(nodes_final, {
+        n = G.UIT.R,
+        nodes = {
+          create_toggle({
+            label = 'Copy from '..mod.id,
+            ref_table = InkConfig,
+            ref_value = mod.id,
+          }),
+        }
+      })
+    end
+  end
+
+  return nodes_final
+end
+
+SMODS.current_mod.config_tab = function()
+  return {
+    n = G.UIT.ROOT,
+    config = {
+      align = "cm",
+      padding = 0.05,
+      colour = G.C.CLEAR,
+    },
+    nodes = create_nodes()
+  }
+end
+
 SMODS.Challenge {
   key = 'inkblot_challenge',
   loc_txt = {
@@ -68,7 +116,8 @@ SMODS.Joker {
       local options = {}
 
       for k, v in pairs(G.P_CENTERS) do
-        if v.key ~= 'j_Inkblot_inkblot_joker' and v.set == 'Joker' and v.unlocked and v.name ~= 'Shortcut' and v.name ~= 'Four Fingers' then
+        if v.key ~= 'j_Inkblot_inkblot_joker' and v.set == 'Joker' and v.unlocked and v.name ~= 'Shortcut' and v.name ~= 'Four Fingers'
+        and (v.mod and InkConfig[v.mod.id]) or (not v.mod and InkConfig['inkvanilla']) then
           options[k] = v
         end
       end
