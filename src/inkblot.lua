@@ -5,6 +5,30 @@ SMODS.Atlas {
   py = 95
 }
 
+SMODS.Challenge {
+  key = 'inkblot_challenge',
+  loc_txt = {
+    name = 'The Inkblot Spread'
+  },
+  jokers = {
+    {
+      id = 'j_Inkblot_inkblot_joker', eternal = true, edition = 'negative'
+    },
+    {
+      id = 'j_Inkblot_inkblot_joker', eternal = true, edition = 'negative'
+    },
+    {
+      id = 'j_Inkblot_inkblot_joker', eternal = true, edition = 'foil'
+    },
+    {
+      id = 'j_Inkblot_inkblot_joker', eternal = true, edition = 'holo'
+    },
+    {
+      id = 'j_Inkblot_inkblot_joker', eternal = true, edition = 'polychrome'
+    },
+  },
+}
+
 --portal to hell
 SMODS.Joker {
   key = 'inkblot_joker',
@@ -20,7 +44,6 @@ SMODS.Joker {
   atlas = 'inkblot',
   pos = { x = 0, y = 0 },
   cost = 3,
-  eternal_compat = false,
   perishable_compat = false,
   discovered = false,
   set_ability = function(self, card, initial, delay_sprites)
@@ -107,6 +130,10 @@ SMODS.Joker {
 
         if G.P_CENTERS[chosen_key.key].calc_dollar_bonus then
           card.calc_dollar_bonus = deepcopy(G.P_CENTERS[chosen_key.key]).calc_dollar_bonus
+        end
+
+        if G.P_CENTERS[chosen_key.key].blueprint_compat then
+          card.blueprint_compat = deepcopy(G.P_CENTERS[chosen_key.key]).blueprint_compat
         end
 
         local function value_exists(tbl, value)
@@ -201,6 +228,10 @@ SMODS.Joker {
 
       if G.P_CENTERS[card.ability.mim_key].calc_dollar_bonus then
         card.calc_dollar_bonus = deepcopy(G.P_CENTERS[card.ability.mim_key]).calc_dollar_bonus
+      end
+
+      if G.P_CENTERS[card.ability.mim_key].blueprint_compat then
+        card.blueprint_compat = deepcopy(G.P_CENTERS[card.ability.mim_key]).blueprint_compat
       end
         card.ability.extra = card.ability.plan_extra
     end
