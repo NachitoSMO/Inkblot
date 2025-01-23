@@ -5,13 +5,16 @@ SMODS.Atlas {
   py = 95
 }
 
-local InkConfig = SMODS.current_mod.config
+local mod = SMODS.current_mod
+local InkConfig = mod.config
 
 local create_nodes = function()
   local nodes_final = {}
+  local options = {}
+  local pages = 1
   local valid_ids = {inkblot = 'inkblot'}
-  
-  table.insert(nodes_final, {
+
+  local opt = {
     n = G.UIT.R,
     nodes = {
       create_toggle({
@@ -20,12 +23,15 @@ local create_nodes = function()
         ref_value = 'inkvanilla',
       }),
     }
-  })
+  }
+  
+  table.insert(options, opt)
   
   for _, mod in ipairs(SMODS.mod_list) do
     if mod.id and not valid_ids[mod.id] then
       valid_ids[mod.id] = mod.id
-      table.insert(nodes_final, {
+
+      local opt = {
         n = G.UIT.R,
         nodes = {
           create_toggle({
@@ -34,9 +40,39 @@ local create_nodes = function()
             ref_value = mod.id,
           }),
         }
-      })
+      }
+
+      table.insert(options, opt)
     end
   end
+
+  for i=1, #SMODS.mod_list do
+    if i % 8 == 0 then
+      pages = pages + 1
+    end
+  end
+
+  local start_index = (InkConfig.inkoptions - 1) * 8 + 1
+  local end_index = start_index + 7
+
+  for i = start_index, end_index do
+    table.insert(nodes_final, options[i])
+  end
+
+  local pg = {}
+  local add = 0
+  for i=1, pages do
+    add = add + 1
+    table.insert(pg, add)
+  end
+
+  local opt = {
+    n = G.UIT.R,
+    nodes = {
+      create_option_cycle({options = pg, opt_callback = 'ink_cycle_update', ref_table = InkConfig, ref_value = 'inkoptions', current_option = InkConfig.inkoptions})
+    }
+  }
+  table.insert(nodes_final, opt)
 
   return nodes_final
 end
@@ -51,6 +87,18 @@ SMODS.current_mod.config_tab = function()
     },
     nodes = create_nodes()
   }
+end
+
+local refresh_config_tab = function()
+  G.FUNCS.openModUI_inkblot()
+end
+
+G.FUNCS.ink_cycle_update = function(args)
+  args = args or {}
+  if args.cycle_config and args.cycle_config.current_option then
+    InkConfig.inkoptions = args.cycle_config.current_option
+    refresh_config_tab()
+  end
 end
 
 SMODS.Challenge {
