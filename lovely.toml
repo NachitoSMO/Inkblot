@@ -12,7 +12,7 @@ pattern = '''G.deck:shuffle('cashout'..G.GAME.round_resets.ante)'''
 position = "after"
 payload = '''
 for i=1, #G.jokers.cards do
-    eval_card(G.jokers.cards[i], {pl_cash_out = true})
+    eval_card(G.jokers.cards[i], {ink_cash_out = true})
 end
 '''
 

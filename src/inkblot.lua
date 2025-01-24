@@ -351,7 +351,7 @@ SMODS.Joker {
     end
   end,
   calculate = function(self, card, context)
-    if context.pl_cash_out and not card.getting_sliced and not context.repetition and not context.individual and not context.blueprint then
+    if context.ink_cash_out and not card.getting_sliced and not context.repetition and not context.individual and not context.blueprint then
       card.from_context = true
       card:set_ability(self, card, nil, nil)
       if card.plan_set_ability_2 then
