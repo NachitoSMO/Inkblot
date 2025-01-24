@@ -35,7 +35,7 @@ local create_nodes = function()
         n = G.UIT.R,
         nodes = {
           create_toggle({
-            label = 'Copy from '..mod.id,
+            label = 'Copy from '..mod.name,
             ref_table = InkConfig,
             ref_value = mod.id,
           }),
