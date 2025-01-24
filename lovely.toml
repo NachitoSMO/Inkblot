@@ -23,19 +23,8 @@ pattern = '''elseif self.ability.name == 'Perkeo' then loc_vars = {self.ability.
         end'''
 position = "after"
 payload = '''
-if G.jokers then
-  for i=1, #G.jokers.cards do
-    if self.ability.name == G.jokers.cards[i].ability.name and G.jokers.cards[i].config.center.key == 'j_Inkblot_inkblot_joker' then
-      self.plantain_info = loc_vars
-    end
-  end
-  if G.shop_jokers and G.shop_jokers.cards then
-    for i=1, #G.shop_jokers.cards do
-      if self.ability.name == G.shop_jokers.cards[i].ability.name and G.shop_jokers.cards[i].config.center.key == 'j_Inkblot_inkblot_joker' then
-        self.plantain_info = loc_vars
-      end
-    end
-  end
+if self.ability and self.ability.mim_key then
+  self.plantain_info = loc_vars
 end
 '''
 match_indent = true
