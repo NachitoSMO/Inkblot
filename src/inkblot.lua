@@ -174,7 +174,8 @@ SMODS.Joker {
       if chosen_key then
 
         for k, v in pairs(card) do
-          if k == 'plan_calc_2' or k == 'plan_loc_vars_2' or k == 'plan_set_ability_2' or k == 'calc_dollar_bonus' then
+          if k == 'plan_calc_2' or k == 'plan_loc_vars_2' or k == 'plan_set_ability_2' or k == 'calc_dollar_bonus' or k == 'plan_add_to_deck'
+          or k == 'blueprint_compat' then
             card[k] = nil
           end
         end
@@ -192,9 +193,6 @@ SMODS.Joker {
           rent = true
         end
 
-
-        card.added_to_deck = false
-        card:remove_from_deck()
         card.added_to_deck = true
         
         local car = SMODS.create_card({set = 'Joker', key = chosen_key.key, no_edition = true})
@@ -233,6 +231,14 @@ SMODS.Joker {
           card.blueprint_compat = deepcopy(G.P_CENTERS[chosen_key.key]).blueprint_compat
         end
 
+        if G.P_CENTERS[chosen_key.key].add_to_deck then
+          card.plan_add_to_deck = deepcopy(G.P_CENTERS[chosen_key.key]).add_to_deck
+        end
+
+        if G.P_CENTERS[chosen_key.key].remove_from_deck then
+          card.plan_remove_from_deck = deepcopy(G.P_CENTERS[chosen_key.key]).remove_from_deck
+        end
+
         local function value_exists(tbl, value)
           for _, v in pairs(tbl) do
               if v == value then
@@ -246,6 +252,10 @@ SMODS.Joker {
           if not value_exists(card, v) then
             table.insert(card, v)
           end
+        end
+
+        if card.plan_add_to_deck then
+          card.plan_add_to_deck(self, card, false)
         end
 
         if card.ability.name == "Invisible Joker" then 
@@ -291,7 +301,6 @@ SMODS.Joker {
           card:set_perishable(true)
         end
 
-
       end
     end
 	end,
@@ -330,7 +339,16 @@ SMODS.Joker {
       if G.P_CENTERS[card.ability.mim_key].blueprint_compat then
         card.blueprint_compat = deepcopy(G.P_CENTERS[card.ability.mim_key]).blueprint_compat
       end
-        card.ability.extra = card.ability.plan_extra
+
+      if G.P_CENTERS[card.ability.mim_key].add_to_deck then
+        card.plan_add_to_deck = deepcopy(G.P_CENTERS[card.ability.mim_key]).add_to_deck
+      end
+
+      if G.P_CENTERS[card.ability.mim_key].remove_from_deck then
+        card.plan_remove_from_deck = deepcopy(G.P_CENTERS[card.ability.mim_key]).remove_from_deck
+      end
+
+      card.ability.extra = card.ability.plan_extra
     end
     return true end}))
   end,
@@ -353,10 +371,22 @@ SMODS.Joker {
   calculate = function(self, card, context)
     if context.ink_cash_out and not card.getting_sliced and not context.repetition and not context.individual and not context.blueprint then
       card.from_context = true
-      card:set_ability(self, card, nil, nil)
+
+      card.added_to_deck = false
+
+      if card.plan_remove_from_deck then
+        card.plan_remove_from_deck(self, card, false)
+        card.plan_remove_from_deck = nil
+      else
+        card:remove_from_deck()
+      end
+      
       if card.plan_set_ability_2 then
         card.plan_set_ability_2(self, card, nil, nil)
+      else
+        card:set_ability(self, card, nil, nil)
       end
+
       card.from_context = false
       return card_eval_status_text(card, 'jokers', nil, nil, nil, {message = 'Updated!', colour = G.C.MONEY})
     end
