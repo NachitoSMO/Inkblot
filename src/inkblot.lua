@@ -165,7 +165,7 @@ SMODS.Joker {
 
       for k, v in pairs(G.P_CENTERS) do
         if v.key ~= 'j_Inkblot_inkblot_joker' and v.set == 'Joker' and v.unlocked and v.name ~= 'Shortcut' and v.name ~= 'Four Fingers'
-        and (v.mod and InkConfig[v.mod.id]) or (not v.mod and InkConfig['inkvanilla']) then
+        and ((v.mod and InkConfig[v.mod.id]) or (not v.mod and InkConfig['inkvanilla'])) then
           options[k] = v
         end
       end
