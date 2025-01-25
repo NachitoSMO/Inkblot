@@ -8,6 +8,13 @@ SMODS.Atlas {
 local mod = SMODS.current_mod
 local InkConfig = mod.config
 
+local old_func = G.FUNCS.exit_mods
+
+G.FUNCS.exit_mods = function()
+  old_func()
+  InkConfig.inkoptions = 1
+end
+
 local create_nodes = function()
   local nodes_final = {}
   local options = {}
