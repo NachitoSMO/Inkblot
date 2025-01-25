@@ -148,7 +148,7 @@ SMODS.Joker {
   pos = { x = 0, y = 0 },
   cost = 3,
   perishable_compat = false,
-  discovered = false,
+  discovered = true,
   set_ability = function(self, card, initial, delay_sprites)
     if card.plan_set_ability_2 and not card.from_context then
       if not card.ability.extra then
@@ -199,8 +199,6 @@ SMODS.Joker {
         if card.ability and card.ability.rental then
           rent = true
         end
-
-        card.added_to_deck = true
         
         local car = SMODS.create_card({set = 'Joker', key = chosen_key.key, no_edition = true})
 
@@ -259,10 +257,6 @@ SMODS.Joker {
           if not value_exists(card, v) then
             table.insert(card, v)
           end
-        end
-
-        if card.plan_add_to_deck then
-          card.plan_add_to_deck(self, card, false)
         end
 
         if card.ability.name == "Invisible Joker" then 
@@ -392,6 +386,162 @@ SMODS.Joker {
         card.plan_set_ability_2(self, card, nil, nil)
       else
         card:set_ability(self, card, nil, nil)
+      end
+
+      if G.jokers and not G.SETTINGS.paused then
+        local function deepcopy(tbl)
+          local copy = {}
+          for k, v in pairs(tbl) do
+            if type(v) == "table" then
+              copy[k] = deepcopy(v)
+            else
+              copy[k] = v
+            end
+          end
+          return copy
+        end
+        
+        local options = {}
+  
+        for k, v in pairs(G.P_CENTERS) do
+          if v.key ~= 'j_Inkblot_inkblot_joker' and v.set == 'Joker' and v.unlocked and v.name ~= 'Shortcut' and v.name ~= 'Four Fingers'
+          and ((v.mod and InkConfig[v.mod.id]) or (not v.mod and InkConfig['inkvanilla'])) then
+            options[k] = v
+          end
+        end
+  
+        local chosen_key = pseudorandom_element(options, pseudoseed('inkblot_joker'))
+        if chosen_key then
+  
+          for k, v in pairs(card) do
+            if k == 'plan_calc_2' or k == 'plan_loc_vars_2' or k == 'plan_set_ability_2' or k == 'calc_dollar_bonus' or k == 'plan_add_to_deck'
+            or k == 'blueprint_compat' then
+              card[k] = nil
+            end
+          end
+  
+          local et = false
+          local rent = false
+          local perish = false
+          if card.ability and card.ability.eternal then
+            et = true
+          end
+          if card.ability and card.ability.perishable then
+            perish = true
+          end
+          if card.ability and card.ability.rental then
+            rent = true
+          end
+  
+          card.added_to_deck = true
+          
+          local car = SMODS.create_card({set = 'Joker', key = chosen_key.key, no_edition = true})
+  
+          card.ability = nil
+          card.ability = deepcopy(car.ability)
+  
+          if car.ability.extra and type(car.ability.extra) ~= 'table' then
+            card.ability.plan_extra = car.ability.extra
+          elseif car.ability.extra then
+            card.ability.plan_extra = deepcopy(car.ability.extra)
+          end
+  
+          card.ability.mim_key = chosen_key.key
+          G.jokers:remove_card(car)
+          car:remove()
+          car = nil
+  
+          if G.P_CENTERS[chosen_key.key].calculate then
+            card.plan_calc_2 = deepcopy(G.P_CENTERS[chosen_key.key]).calculate
+          end
+  
+          if G.P_CENTERS[chosen_key.key].loc_vars then
+            card.plan_loc_vars_2 = deepcopy(G.P_CENTERS[chosen_key.key]).loc_vars
+          end
+  
+          if G.P_CENTERS[chosen_key.key].set_ability then
+            card.plan_set_ability_2 = deepcopy(G.P_CENTERS[chosen_key.key]).set_ability
+          end
+  
+          if G.P_CENTERS[chosen_key.key].calc_dollar_bonus then
+            card.calc_dollar_bonus = deepcopy(G.P_CENTERS[chosen_key.key]).calc_dollar_bonus
+          end
+  
+          if G.P_CENTERS[chosen_key.key].blueprint_compat then
+            card.blueprint_compat = deepcopy(G.P_CENTERS[chosen_key.key]).blueprint_compat
+          end
+  
+          if G.P_CENTERS[chosen_key.key].add_to_deck then
+            card.plan_add_to_deck = deepcopy(G.P_CENTERS[chosen_key.key]).add_to_deck
+          end
+  
+          if G.P_CENTERS[chosen_key.key].remove_from_deck then
+            card.plan_remove_from_deck = deepcopy(G.P_CENTERS[chosen_key.key]).remove_from_deck
+          end
+  
+          local function value_exists(tbl, value)
+            for _, v in pairs(tbl) do
+                if v == value then
+                    return true
+                end
+            end
+            return false
+          end
+        
+          for k, v in pairs(deepcopy(G.P_CENTERS[chosen_key.key])) do
+            if not value_exists(card, v) then
+              table.insert(card, v)
+            end
+          end
+  
+          if card.plan_add_to_deck then
+            card.plan_add_to_deck(self, card, false)
+          end
+  
+          if card.ability.name == "Invisible Joker" then 
+            card.ability.invis_rounds = 0
+          end
+          if card.ability.name == 'To Do List' then
+            local _poker_hands = {}
+            for k, v in pairs(G.GAME.hands) do
+                if v.visible then _poker_hands[#_poker_hands+1] = k end
+            end
+            local old_hand = card.ability.to_do_poker_hand
+            card.ability.to_do_poker_hand = nil
+    
+            while not card.ability.to_do_poker_hand do
+              card.ability.to_do_poker_hand = pseudorandom_element(_poker_hands, pseudoseed((card.area and card.area.config.type == 'title') and 'false_to_do' or 'to_do'))
+                if card.ability.to_do_poker_hand == old_hand then card.ability.to_do_poker_hand = nil end
+            end
+          end
+          if card.ability.name == 'Caino' then 
+            card.ability.caino_xmult = 1
+          end
+          if card.ability.name == 'Yorick' then 
+            card.ability.yorick_discards = card.ability.extra.discards
+          end
+          if card.ability.name == 'Loyalty Card' then 
+            card.ability.burnt_hand = 0
+            card.ability.loyalty_remaining = card.ability.extra.every
+          end
+    
+          card.base_cost = card.config.center.cost or 1
+    
+          card.ability.hands_played_at_create = G.GAME and G.GAME.hands_played or 0
+  
+          if et then
+            card:set_eternal(true)
+          end
+  
+          if rent then
+            card:set_rental(true)
+          end
+  
+          if perish then
+            card:set_perishable(true)
+          end
+  
+        end
       end
 
       card.from_context = false
